@@ -124,3 +124,9 @@ docs/
 This tool is for research and informational purposes only. It does not constitute a binding tariff ruling or legal customs advice. Always verify classifications with official customs authorities before importation or exportation.
 
 **Data sources:** WCO HS 2022 · China CCC 2024 · Indonesia BTKI 2022 · ASEAN AHTN 2022
+
+---
+
+## License
+
+This repository includes AGPL-3.0-licensed components where noted; see [`LICENSE`](LICENSE).
