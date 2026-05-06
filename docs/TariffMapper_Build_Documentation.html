@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TariffMapper — Build Documentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+@page {
+  size: A4;
+  margin: 14mm 16mm 18mm 16mm;
+}
+@media print {
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .cover, .toc { page-break-after: always; }
+  h2 { page-break-after: avoid; break-after: avoid; }
+  h3 { page-break-after: avoid; }
+  .keep { page-break-inside: avoid; break-inside: avoid; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 8pt; color: #555; word-break: break-all; }
+  .no-print-url a::after { content: none !important; }
+}
+:root {
+  --ink: #0f172a;
+  --muted: #475569;
+  --faint: #64748b;
+  --line: #e2e8f0;
+  --accent: #1d4ed8;
+  --accent-soft: #eff6ff;
+  --surface: #f8fafc;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+  --sans: "IBM Plex Sans", system-ui, sans-serif;
+  --serif: "IBM Plex Serif", Georgia, serif;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 10.5pt;
+  line-height: 1.55;
+  color: var(--ink);
+  background: #fff;
+}
+.cover {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 8mm 10mm 12mm;
+  background: linear-gradient(165deg, #0f172a 0%, #1e3a5f 42%, #1e40af 100%);
+  color: #f1f5f9;
+  position: relative;
+  overflow: hidden;
+}
+.cover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 50% at 100% 0%, rgba(255,255,255,.12), transparent 55%);
+  pointer-events: none;
+}
+.cover-inner { position: relative; z-index: 1; max-width: 520px; }
+.cover-kicker {
+  font-size: 9pt;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #93c5fd;
+  margin-bottom: 14px;
+}
+.cover h1 {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 32pt;
+  line-height: 1.12;
+  margin: 0 0 10px;
+  letter-spacing: -0.02em;
+}
+.cover-sub {
+  font-size: 13pt;
+  color: #cbd5e1;
+  font-weight: 400;
+  margin-bottom: 22px;
+  max-width: 460px;
+}
+.cover-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 28px;
+}
+.cover-pills span {
+  font-size: 8.5pt;
+  font-weight: 600;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.18);
+  color: #e2e8f0;
+}
+.cover-meta {
+  font-size: 9.5pt;
+  color: #94a3b8;
+  border-top: 1px solid rgba(255,255,255,.15);
+  padding-top: 16px;
+}
+.cover-meta strong { color: #e2e8f0; font-weight: 600; }
+.cover-foot {
+  position: absolute;
+  bottom: 10mm;
+  left: 10mm;
+  right: 10mm;
+  font-size: 8pt;
+  color: #64748b;
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid rgba(255,255,255,.1);
+  padding-top: 10px;
+}
+.toc {
+  padding: 10mm 12mm;
+  background: var(--surface);
+}
+.toc h2 {
+  font-family: var(--serif);
+  font-size: 18pt;
+  margin: 0 0 14px;
+  color: var(--ink);
+}
+.toc ol {
+  margin: 0;
+  padding-left: 18px;
+  columns: 2;
+  column-gap: 28px;
+}
+.toc li {
+  margin-bottom: 6px;
+  break-inside: avoid;
+}
+.toc a { color: var(--accent); text-decoration: none; font-weight: 500; }
+.toc a:hover { text-decoration: underline; }
+.doc {
+  padding: 0 12mm 14mm;
+  max-width: 190mm;
+  margin: 0 auto;
+}
+h2 {
+  font-family: var(--serif);
+  font-size: 15pt;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 22px 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--accent);
+}
+h2:first-of-type { margin-top: 0; }
+h3 {
+  font-size: 11pt;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 16px 0 8px;
+}
+p { margin: 0 0 10px; color: #334155; }
+ul { margin: 0 0 12px; padding-left: 18px; color: #334155; }
+li { margin-bottom: 4px; }
+.lead {
+  font-size: 11pt;
+  color: #1e293b;
+  font-weight: 500;
+}
+.callout {
+  background: var(--accent-soft);
+  border: 1px solid #bfdbfe;
+  border-left: 4px solid var(--accent);
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin: 12px 0;
+  font-size: 9.5pt;
+  color: #1e3a8a;
+}
+.callout strong { color: #1e40af; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 9pt;
+  margin: 10px 0 14px;
+}
+th {
+  text-align: left;
+  background: #0f172a;
+  color: #f8fafc;
+  font-weight: 600;
+  padding: 8px 10px;
+  border: 1px solid #0f172a;
+}
+td {
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  vertical-align: top;
+  color: #334155;
+}
+tr:nth-child(even) td { background: #fafafa; }
+pre, .diagram {
+  font-family: var(--mono);
+  font-size: 8pt;
+  line-height: 1.45;
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 12px 14px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 10px 0 14px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+code {
+  font-family: var(--mono);
+  font-size: 8.8pt;
+  background: #f1f5f9;
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: #0f172a;
+}
+.section-num {
+  display: inline-block;
+  min-width: 22px;
+  font-family: var(--mono);
+  font-size: 9pt;
+  font-weight: 600;
+  color: var(--accent);
+  margin-right: 4px;
+}
+.footer-line {
+  margin-top: 28px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-size: 8.5pt;
+  color: var(--faint);
+  text-align: center;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ COVER ═══ -->
+<section class="cover no-print-url">
+  <div class="cover-inner">
+    <div class="cover-kicker">Tsunami Advisors · AI Intern Case Study</div>
+    <h1>Build Documentation</h1>
+    <p class="cover-sub">TariffMapper — automated China ↔ Indonesia customs tariff code mapping (prototype).</p>
+    <div class="cover-pills">
+      <span>GPT-4o</span><span>Next.js 16</span><span>TypeScript</span><span>HS 2022</span><span>CCC 2024</span><span>BTKI / AHTN</span><span>Optional Supabase</span>
+    </div>
+    <div class="cover-meta">
+      <strong>Status:</strong> MVP complete · <strong>Version:</strong> 1.0 · <strong>Date:</strong> May 2026<br>
+      <strong>Deliverable:</strong> Build documentation (2–4 pages equivalent) per case study specification.
+    </div>
+  </div>
+  <div class="cover-foot">
+    <span>Confidential — Tsunami Advisors</span>
+    <span>TariffMapper Build Documentation</span>
+  </div>
+</section>
+
+<!-- ═══ TOC ═══ -->
+<section class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#s1">Project overview</a></li>
+    <li><a href="#s2">Tools and technology stack</a></li>
+    <li><a href="#s3">System architecture</a></li>
+    <li><a href="#s4">Key prompts and prompt engineering</a></li>
+    <li><a href="#s5">Data sources</a></li>
+    <li><a href="#s6">Matching logic and ranking</a></li>
+    <li><a href="#s7">Supabase schema (optional)</a></li>
+    <li><a href="#s8">Limitations and risks</a></li>
+    <li><a href="#s9">AI vs human judgment</a></li>
+    <li><a href="#s10">Deployment</a></li>
+    <li><a href="#s11">Reflection</a></li>
+  </ol>
+</section>
+
+<!-- ═══ BODY ═══ -->
+<main class="doc">
+
+<h2 id="s1"><span class="section-num">1</span>Project overview</h2>
+<p class="lead">TariffMapper is a generative-AI-first prototype that maps import and export product classification codes between China and Indonesia. The user enters a product description, HS code, or national tariff code; the system returns the top five likely matches in the <em>target</em> country with confidence, match type, tariff indicator, explanation, and source references.</p>
+<p>The system is designed to support:</p>
+<ul>
+  <li><strong>One-to-many mappings</strong> — one HS anchor can expand to several national codes.</li>
+  <li><strong>Ambiguous descriptions</strong> — natural language is resolved to plausible HS anchors with calibrated confidence.</li>
+  <li><strong>National divergence</strong> — differences beyond six digits (China CCC vs Indonesia BTKI/AHTN) are surfaced in <code>divergenceNote</code>.</li>
+  <li><strong>Low certainty</strong> — results below the rubric threshold use <code>manual_review</code> and are called out in the UI.</li>
+</ul>
+
+<h2 id="s2"><span class="section-num">2</span>Tools and technology stack</h2>
+<div class="keep">
+<table>
+  <thead><tr><th>Layer</th><th>Tool / library</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td>AI engine</td><td>OpenAI GPT-4o</td><td>Mapping, semantic interpretation, explanations</td></tr>
+    <tr><td>Frontend</td><td>Next.js 16 (App Router)</td><td>React UI, static + server routes</td></tr>
+    <tr><td>Styling</td><td>Tailwind CSS</td><td>Responsive layout</td></tr>
+    <tr><td>Language</td><td>TypeScript</td><td>End-to-end type safety</td></tr>
+    <tr><td>API</td><td>Next.js route handlers</td><td><code>POST /api/map</code></td></tr>
+    <tr><td>Persistence (optional)</td><td>Supabase (PostgreSQL)</td><td>Result cache + search history</td></tr>
+    <tr><td>Hosting</td><td>Vercel (recommended)</td><td>Zero-config Next.js deploy</td></tr>
+  </tbody>
+</table>
+</div>
+<h3>Why GPT-4o?</h3>
+<ol>
+  <li>No public, complete bilateral CCC↔BTKI crosswalk exists — a pure database approach would require building and maintaining a proprietary crosswalk.</li>
+  <li>Product descriptions need semantic understanding, not only exact string match.</li>
+  <li><code>response_format: json_object</code> plus low temperature (0.1) yields consistent structured JSON.</li>
+  <li>The model can articulate <em>why</em> a code was suggested (traceability requirement).</li>
+</ol>
+
+<h2 id="s3"><span class="section-num">3</span>System architecture</h2>
+<pre class="diagram">┌──────────────────────────────────────────────────┐
+│                   Browser (React)                  │
+│  SearchForm → POST /api/map → ResultCards display  │
+└───────────────────────┬──────────────────────────┘
+                        │ fetch()
+┌───────────────────────▼──────────────────────────┐
+│           Next.js API Route (/api/map)             │
+│   1. Validate input                                │
+│   2. Check Supabase cache (cache_key lookup)       │
+│   3. If miss → call OpenAI GPT-4o                  │
+│   4. Cache result + log search history             │
+│   5. Return MappingResponse JSON                   │
+└────────────────┬──────────────────┬───────────────┘
+                 │                  │
+    ┌────────────▼────┐   ┌─────────▼──────────┐
+    │  OpenAI GPT-4o  │   │  Supabase (PG)     │
+    │  JSON mode      │   │  mappings_cache     │
+    │  temp = 0.1     │   │  search_history     │
+    └─────────────────┘   └────────────────────┘</pre>
+<p><strong>Request lifecycle:</strong> (1) User submits query, direction, and search mode. (2) API checks cache key <code>direction::normalised_query</code>. (3) On miss, system + user prompts are sent to GPT-4o. (4) Response is parsed; cache and history writes are non-blocking. (5) Client renders cards with confidence, basis, and expandable details.</p>
+
+<h2 id="s4"><span class="section-num">4</span>Key prompts and prompt engineering</h2>
+<h3>4.1 System prompt design</h3>
+<p>The system prompt encodes HS 2022 structure, China CCC 2024 extensions, Indonesia BTKI 2022 (AHTN-aligned), and a four-tier confidence rubric. It enforces: no fabricated rates; national divergence notes; <code>manual_review</code> below 40%; and four <code>matchBasis</code> values: <code>hs_digits</code>, <code>semantic</code>, <code>tariff_structure</code>, <code>ahtn_extension</code>.</p>
+<div class="keep">
+<table>
+  <thead><tr><th>Tier</th><th>Score</th><th>Label</th><th>Criteria</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>85–100%</td><td><code>exact</code></td><td>Strong HS anchor + clear target national extension</td></tr>
+    <tr><td>2</td><td>65–84%</td><td><code>likely</code></td><td>HS match; minor sub-heading ambiguity</td></tr>
+    <tr><td>3</td><td>40–64%</td><td><code>partial</code></td><td>Adjacent HS / chapter-level only</td></tr>
+    <tr><td>4</td><td>0–39%</td><td><code>manual_review</code></td><td>Multi-chapter ambiguity or insufficient data</td></tr>
+  </tbody>
+</table>
+</div>
+<h3>4.2 Prompt iterations (v1 → v4)</h3>
+<ul>
+  <li><strong>v1</strong> — Free-text output; fabricated rates.</li>
+  <li><strong>v2</strong> — JSON mode + anti-fabrication rules; scores miscalibrated (too high).</li>
+  <li><strong>v3</strong> — Tiered rubric + citations; anchor vs national codes still conflated.</li>
+  <li><strong>v4</strong> — Anchor-first instruction; <code>matchBasis</code> + <code>divergenceNote</code>; temperature 0.1.</li>
+</ul>
+<div class="callout keep">
+  <strong>4.3 Direction enforcement (refinement).</strong> The system prompt is now built per request via <code>buildSystemPrompt(direction)</code>. A <strong>CRITICAL DIRECTION RULE</strong> block states that every <code>matches[].code</code> must be a <em>target-country</em> national code (Indonesia BTKI when mapping China→Indonesia; China CCC when mapping Indonesia→China). This fixed cases where the model echoed source-country codes or treated direction ambiguously. Identical 10-digit strings can still appear for both countries on some commodities (e.g. crude palm oil) — that is noted in <code>processingNote</code> when applicable.
+</div>
+
+<h2 id="s5"><span class="section-num">5</span>Data sources and selection rationale</h2>
+<div class="keep">
+<table>
+  <thead><tr><th>Source</th><th>Reference</th><th>Why selected</th></tr></thead>
+  <tbody>
+    <tr><td>WCO HS 2022</td><td>wcoomd.org (HS Nomenclature 2022)</td><td>International six-digit anchor for all mappings</td></tr>
+    <tr><td>China CCC 2024</td><td>tariff.customs.gov.cn</td><td>Official eight–ten digit extensions and MFN context</td></tr>
+    <tr><td>Indonesia BTKI 2022</td><td>insw.go.id / beacukai.go.id</td><td>Official tariff book; AHTN-based national codes</td></tr>
+    <tr><td>ASEAN AHTN 2022</td><td>asean.org</td><td>Framework for Indonesian eight-digit structure</td></tr>
+    <tr><td>ACFTA / RCEP</td><td>Official FTA schedules</td><td>Preferential rate context where relevant</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Only <strong>public</strong> sources and model knowledge within assignment constraints — no non-public customs databases or invented legal certainty.</p>
+
+<h2 id="s6"><span class="section-num">6</span>Matching logic and ranking methodology</h2>
+<pre class="diagram">Input (description / HS code / local code)
+    │
+    ▼ Step 1 — Anchor resolution (6-digit HS)
+    ▼ Step 2 — Map to target national codes (8–10 digits)
+    ▼ Step 3 — One-to-many expansion where the schedule branches
+    ▼ Step 4 — Score with rubric; sort descending by confidence
+    ▼ Step 5 — Divergence check → populate divergenceNote</pre>
+<h3>6.1 Fuzzy or incomplete product descriptions</h3>
+<p>For vague inputs (e.g. “industrial pump”), the pipeline returns candidates across plausible chapters, lowers confidence, and explains ambiguity in <code>processingNote</code> so users see <em>why</em> the spread exists.</p>
+<h3>6.2 National codes beyond six digits</h3>
+<p>Examples documented in the build: Chapter 85 (China often more granular on electrical sub-lines); Chapter 15 (Indonesia palm-oil granularity); Chapter 84 (automation equipment divergence at eight digits). Each result can carry a <code>divergenceNote</code> tying divergence to the two national schedules.</p>
+
+<h2 id="s7"><span class="section-num">7</span>Supabase schema (optional infrastructure)</h2>
+<pre class="diagram">-- mappings_cache: dedupe identical queries per direction
+CREATE TABLE mappings_cache (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  cache_key TEXT UNIQUE NOT NULL,
+  result JSONB NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- search_history: lightweight audit / analytics
+CREATE TABLE search_history (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  query TEXT NOT NULL,
+  direction TEXT NOT NULL,
+  search_mode TEXT NOT NULL,
+  hs_anchor TEXT,
+  result_count INTEGER,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);</pre>
+<p><strong>Note:</strong> The live app runs without Supabase; caching and history are skipped if env vars are absent.</p>
+
+<h2 id="s8"><span class="section-num">8</span>Limitations and unresolved classification risks</h2>
+<p><strong>Hard limitations:</strong> model knowledge cutoff; no live MFN/FTA rate API in MVP; no binding ruling authority; ten-digit micro-codes (e.g. CIQ-driven splits) may be incomplete without a live tariff database.</p>
+<p><strong>Unresolved risks:</strong> dual-use goods and licensing; Chapter 98 / special provisions; schedule drift between HS amendments and national sync; highly ambiguous multi-function products.</p>
+
+<h2 id="s9"><span class="section-num">9</span>What AI did well vs what requires human judgment</h2>
+<div class="keep">
+<table>
+  <thead><tr><th>AI strengths</th><th>Assessment</th></tr></thead>
+  <tbody>
+    <tr><td>Semantic anchoring</td><td>Strong on typical product language → HS headings</td></tr>
+    <tr><td>One-to-many suggestions</td><td>Reliably produces five ranked candidates</td></tr>
+    <tr><td>Explainability</td><td>Natural-language rationale + basis labels</td></tr>
+    <tr><td>Ambiguity signalling</td><td><code>manual_review</code> tier used for low-confidence cases</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="keep">
+<table>
+  <thead><tr><th>Human judgment still required</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td>Exact duty / FTA eligibility</td><td>Requires live official schedule + origin documentation</td></tr>
+    <tr><td>Ten-digit precision</td><td>Product-specific attributes and national sub-notes</td></tr>
+    <tr><td>Regulatory overlays</td><td>Licences, SPS, certification — outside pure HS mapping</td></tr>
+    <tr><td>Binding classification</td><td>Only customs authorities issue advance rulings</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="s10"><span class="section-num">10</span>Deployment (summary)</h2>
+<p><strong>Required:</strong> <code>OPENAI_API_KEY</code> in <code>.env.local</code> (or Vercel env). <strong>Optional:</strong> <code>NEXT_PUBLIC_SUPABASE_URL</code> and <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> for cache + history. Typical cost: roughly $0.01–0.03 per mapping call depending on token usage.</p>
+<p>Local: <code>cd tariff-mapper && npm install && npm run dev</code>. Production: <code>vercel deploy</code> with the same environment variables.</p>
+
+<h2 id="s11"><span class="section-num">11</span>Reflection</h2>
+<p><strong>What worked best:</strong> JSON-mode GPT-4o with a domain-heavy system prompt produced stable structured payloads suitable for direct UI binding; optional Supabase cache reduces repeat OpenAI cost for demos.</p>
+<p><strong>Where matching was weakest:</strong> multi-chapter consumer electronics (“smart home” style queries); highly granular Indonesian palm fractions vs Chinese line splits; dense chemical/pharma trees with many national children.</p>
+<p><strong>Next version:</strong> live rate ingestion from official portals; curated or embedded crosswalk / embeddings; HS tree browser; CSV batch mode; analytics on low-confidence clusters from <code>search_history</code>.</p>
+
+<p class="footer-line">TariffMapper · Build Documentation · May 2026 · For research and informational use only.</p>
+</main>
+
+</body>
+</html>

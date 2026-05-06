@@ -1,0 +1,13 @@
+.DS_Store
+.env
+.env.*
+!.env*.example
+
+# Next.js app (tariff-mapper)
+tariff-mapper/node_modules/
+tariff-mapper/.next/
+tariff-mapper/out/
+tariff-mapper/.vercel/
+tariff-mapper/*.tsbuildinfo
+tariff-mapper/npm-debug.log*
+tariff-mapper/.pnpm-debug.log*

@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TariffMapper — China ↔ Indonesia Customs Classification</title>
+<meta name="description" content="AI-powered tariff code mapping between China CCC 2024 and Indonesia BTKI 2022. Search by product description, HS code, or national tariff code.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0b0e;--surface:#10121a;--surface-2:#161824;--surface-3:#1c1f2e;
+  --border:rgba(255,255,255,.07);--border-h:rgba(255,255,255,.14);
+  --text:#e8eaf0;--muted:#8891a8;--faint:#4a5068;
+  --accent:#3b82f6;--accent-dim:rgba(59,130,246,.1);--accent-glow:rgba(59,130,246,.22);
+  --cyan:#06b6d4;--china:#e53e3e;--china-dim:rgba(229,62,62,.08);
+  --indo:#ed8936;--indo-dim:rgba(237,137,54,.08);
+  --green:#10b981;--yellow:#f59e0b;--red:#ef4444;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'Inter',system-ui,sans-serif;
+  --spring:cubic-bezier(.16,1,.3,1);--out:cubic-bezier(0,0,.2,1);
+  --r-sm:6px;--r-md:8px;--r-lg:12px;--r-xl:20px;
+  --shadow:0 0 0 1px rgba(59,130,246,.06),0 24px 64px rgba(0,0,0,.55);
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+@property --ga{syntax:'<angle>';inherits:false;initial-value:0deg}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+input{font-family:inherit}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:3px}
+
+/* ── ANIMATIONS ── */
+@keyframes spin-ga{to{--ga:360deg}}
+@keyframes mesh{0%,100%{transform:scale(1) rotate(0deg)}50%{transform:scale(1.08) rotate(2deg)}}
+@keyframes oscillate{0%,100%{transform:translateX(0)}50%{transform:translateX(6px)}}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes shimmer{from{background-position:-800px 0}to{background-position:800px 0}}
+@keyframes card-in{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
+@keyframes fade-up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes chip-in{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes bar-fill{from{width:0!important}}
+
+/* ── HEADER ── */
+.hdr{position:sticky;top:0;z-index:100;width:100%;background:rgba(10,11,14,.82);backdrop-filter:blur(14px) saturate(180%);border-bottom:1px solid var(--border)}
+.hdr-i{max-width:1200px;margin:0 auto;padding:0 24px;height:58px;display:flex;align-items:center;gap:20px}
+.logo{display:flex;align-items:center;gap:10px;flex-shrink:0;text-decoration:none}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--cyan));border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-name{font-size:15px;font-weight:700;letter-spacing:-.3px;color:var(--text)}
+.logo-sub{font-size:10px;color:var(--faint);display:block;margin-top:1px}
+.nav{display:flex;align-items:center;gap:2px;position:relative;flex:1}
+.nav-ind{position:absolute;height:100%;background:var(--surface-3);border:1px solid var(--border);border-radius:var(--r-md);transition:left .28s var(--spring),width .28s var(--spring);pointer-events:none;top:0}
+.nav-tab{padding:6px 13px;font-size:12px;font-weight:500;color:var(--faint);border-radius:var(--r-md);transition:color .15s;position:relative;z-index:1;white-space:nowrap;cursor:pointer}
+.nav-tab:hover{color:var(--muted)}.nav-tab.active{color:var(--text)}
+.gpt-wrap{margin-left:auto;flex-shrink:0;--ga:0deg;animation:spin-ga 3.5s linear infinite;background:conic-gradient(from var(--ga),var(--accent),var(--cyan),#8b5cf6,var(--accent));padding:1.5px;border-radius:20px}
+.gpt-inner{display:flex;align-items:center;gap:6px;background:var(--surface);border-radius:18.5px;padding:5px 12px;font-size:12px;font-weight:600;color:var(--muted)}
+.gpt-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2.2s ease-in-out infinite}
+
+/* ── HERO ── */
+.hero{position:relative;overflow:hidden;padding:68px 0 52px;border-bottom:1px solid var(--border)}
+.hero-mesh{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 70% 60% at 8% 50%,rgba(59,130,246,.07) 0%,transparent 60%),radial-gradient(ellipse 45% 35% at 82% 18%,rgba(6,182,212,.05) 0%,transparent 55%),radial-gradient(ellipse 30% 28% at 55% 85%,rgba(139,92,246,.04) 0%,transparent 50%);animation:mesh 28s ease-in-out infinite}
+.hero-i{max-width:1200px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+.hero-eye{display:flex;align-items:center;gap:8px;margin-bottom:22px}
+.badge{font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;padding:4px 11px;border-radius:20px;border:1px solid}
+.badge-ai{color:var(--accent);border-color:rgba(59,130,246,.3);background:var(--accent-dim)}
+.badge-ver{color:var(--faint);border-color:var(--border);background:transparent}
+.hero-h1{font-size:clamp(2rem,4vw,3rem);font-weight:700;letter-spacing:-1px;line-height:1.1;margin-bottom:14px}
+.hero-sub{display:flex;align-items:center;gap:12px;font-size:clamp(1.1rem,2.2vw,1.6rem);font-weight:600;letter-spacing:-.3px;margin-bottom:20px;flex-wrap:wrap}
+.cn{color:var(--china)}.id{color:var(--indo)}
+.hero-arrow{display:flex;align-items:center;animation:oscillate 2.2s ease-in-out infinite;color:var(--faint)}
+.hero-desc{font-size:15px;color:var(--muted);max-width:520px;line-height:1.75;margin-bottom:44px}
+.stats{display:flex;gap:44px;flex-wrap:wrap}
+.stat{position:relative}
+.stat::before{content:'';position:absolute;top:-10px;left:0;width:20px;height:2px;background:var(--accent);border-radius:1px;box-shadow:0 0 8px var(--accent)}
+.stat-n{font-size:28px;font-weight:700;color:var(--text);letter-spacing:-.5px;line-height:1;font-variant-numeric:tabular-nums}
+.stat-l{font-size:12px;color:var(--faint);margin-top:4px}
+
+/* ── MARQUEE ── */
+.mq{overflow:hidden;background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:11px 0}
+.mq-track{display:inline-flex;white-space:nowrap;animation:marquee 32s linear infinite}
+.mq-item{display:inline-flex;align-items:center;gap:8px;padding:0 28px;font-size:11px;font-weight:500;color:var(--faint);letter-spacing:.8px;text-transform:uppercase}
+.mq-dot{width:3px;height:3px;border-radius:50%;background:var(--accent);flex-shrink:0}
+
+/* ── DISCLAIMER ── */
+.disc{max-width:1200px;margin:24px auto 0;padding:0 24px}
+.disc-card{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.18);border-left:3px solid var(--yellow);border-radius:var(--r-md)}
+.disc-ico{color:var(--yellow);flex-shrink:0;margin-top:1px;animation:pulse 3s ease-in-out infinite}
+.disc-txt{font-size:12px;color:rgba(245,158,11,.75);line-height:1.65}
+.disc-txt strong{color:var(--yellow)}
+
+/* ── LAYOUT ── */
+.layout{max-width:1200px;margin:24px auto;padding:0 24px;display:grid;grid-template-columns:380px 1fr;gap:20px;align-items:start}
+@media(max-width:960px){.layout{grid-template-columns:1fr}}
+
+/* ── GLASS PANEL ── */
+.panel{position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);box-shadow:var(--shadow)}
+.panel::before{content:'';position:absolute;inset:0;background:radial-gradient(480px circle at var(--mx,-100%) var(--my,-100%),rgba(59,130,246,.05),transparent 40%);pointer-events:none;z-index:0;border-radius:inherit}
+.p-z{position:relative;z-index:1}
+
+/* ── SEARCH PANEL ── */
+.sp{top:78px;position:sticky}
+.sp-head{padding:20px 20px 0}
+.sp-lbl{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--faint);margin-bottom:3px}
+.sp-title{font-size:16px;font-weight:600;color:var(--text);margin-bottom:3px}
+.sp-sub{font-size:12px;color:var(--faint)}
+.divider{height:1px;background:var(--border);margin:16px 20px}
+.sp-body{padding:0 20px 20px}
+.sec{margin-bottom:20px}
+.sec-lbl{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--faint);margin-bottom:8px}
+
+/* Direction toggle */
+.dir-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dir-btn{display:flex;align-items:center;justify-content:center;gap:5px;padding:10px 8px;border-radius:var(--r-md);font-size:11px;font-weight:600;border:1px solid var(--border);background:transparent;color:var(--faint);transition:all .25s var(--spring);cursor:pointer;position:relative;overflow:hidden}
+.dir-btn::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s;border-radius:inherit}
+.dir-btn.cn-id::before{background:var(--china-dim)}.dir-btn.id-cn::before{background:var(--indo-dim)}
+.dir-btn.active{color:var(--text);border-color:var(--border-h);background:var(--surface-2)}
+.dir-btn.cn-id.active{border-color:rgba(229,62,62,.3)}.dir-btn.id-cn.active{border-color:rgba(237,137,54,.3)}
+.dir-btn.active::before{opacity:1}
+.dir-flag{font-size:14px;transition:transform .2s var(--spring)}
+.dir-btn:hover .dir-flag{transform:scale(1.18)}.dir-btn.active .dir-flag{transform:scale(1.1)}
+.dir-arr{transition:transform .4s var(--spring);color:var(--faint)}
+.dir-btn.active .dir-arr{color:var(--muted)}
+
+/* Segmented control */
+.seg{display:flex;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-md);padding:3px;position:relative}
+.seg-ind{position:absolute;top:3px;height:calc(100% - 6px);background:var(--surface-3);border:1px solid var(--border-h);border-radius:calc(var(--r-md) - 2px);transition:left .28s var(--spring),width .28s var(--spring);pointer-events:none;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.seg-btn{flex:1;padding:7px 8px;font-size:12px;font-weight:500;color:var(--faint);border-radius:calc(var(--r-md) - 2px);transition:color .15s;cursor:pointer;position:relative;z-index:1;text-align:center;background:transparent}
+.seg-btn.active{color:var(--text)}.seg-btn:not(.active):hover{color:var(--muted)}
+
+/* Search input */
+.inp-wrap{position:relative}
+.inp-ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--faint);pointer-events:none;transition:color .2s}
+.inp{width:100%;height:52px;padding:0 46px 0 44px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-lg);color:var(--text);font-size:14px;outline:none;transition:border-color .2s,box-shadow .2s}
+.inp::placeholder{color:var(--faint)}
+.inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.inp:focus + .inp-ico{color:var(--accent)}
+.inp-shortcut{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:10px;font-family:var(--mono);color:var(--faint);background:var(--surface-3);border:1px solid var(--border);border-radius:4px;padding:2px 5px;opacity:0;transition:opacity .2s;pointer-events:none}
+.inp-wrap:focus-within .inp-shortcut,.inp-wrap:hover .inp-shortcut{opacity:1}
+
+/* Chips */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{font-size:11px;font-family:var(--mono);color:var(--faint);background:transparent;border:1px solid var(--border);border-radius:20px;padding:4px 10px;cursor:pointer;transition:all .2s var(--spring);animation:chip-in .4s var(--spring) both}
+.chip:hover{color:var(--accent);border-color:rgba(59,130,246,.4);background:var(--accent-dim)}
+.chip:active{transform:scale(.94)}
+
+/* Search button */
+.srch-btn{width:100%;height:44px;background:linear-gradient(135deg,var(--accent),var(--cyan));border:none;border-radius:var(--r-md);color:#fff;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .25s var(--spring);position:relative;overflow:hidden}
+.srch-btn:hover{box-shadow:0 0 0 1px rgba(255,255,255,.08),0 8px 28px rgba(59,130,246,.4);transform:translateY(-1px)}
+.srch-btn:active{transform:translateY(0)}
+.srch-btn:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
+.srch-spin{display:none;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+.srch-btn.loading .btn-lbl,.srch-btn.loading .btn-ico{display:none}
+.srch-btn.loading .srch-spin{display:block}
+
+/* Sources */
+.sources{margin-top:16px;padding:14px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-md)}
+.sources-ttl{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--faint);margin-bottom:10px}
+.src-item{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--faint);padding:3px 0}
+.src-dot{width:3px;height:3px;border-radius:50%;background:var(--accent);flex-shrink:0}
+
+/* ── RESULTS PANEL ── */
+.rp{min-height:520px}
+
+/* Empty state */
+.empty{padding:52px 28px;text-align:center}
+.empty-ico{width:60px;height:60px;margin:0 auto 20px;background:var(--surface-2);border:1px solid var(--border);border-radius:14px;display:flex;align-items:center;justify-content:center;color:var(--faint)}
+.empty-title{font-size:17px;font-weight:600;color:var(--text);margin-bottom:8px}
+.empty-desc{font-size:13px;color:var(--faint);max-width:300px;margin:0 auto 32px;line-height:1.65}
+.steps3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:left}
+@media(max-width:560px){.steps3{grid-template-columns:1fr}}
+.step3{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px}
+.s3-n{font-family:var(--mono);font-size:22px;font-weight:600;color:var(--faint);opacity:.25;line-height:1;margin-bottom:8px}
+.s3-ico{width:26px;height:26px;background:var(--accent-dim);border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--accent);margin-bottom:8px}
+.s3-t{font-size:11px;font-weight:600;color:var(--text);margin-bottom:3px}
+.s3-d{font-size:11px;color:var(--faint);line-height:1.5}
+
+/* Tier legend */
+.tiers{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:20px}
+@media(max-width:560px){.tiers{grid-template-columns:repeat(2,1fr)}}
+.tier{padding:10px;border-radius:var(--r-md);border:1px solid}
+.tier.ex{background:rgba(16,185,129,.05);border-color:rgba(16,185,129,.18)}
+.tier.lk{background:rgba(59,130,246,.05);border-color:rgba(59,130,246,.18)}
+.tier.pt{background:rgba(245,158,11,.05);border-color:rgba(245,158,11,.18)}
+.tier.mr{background:rgba(239,68,68,.05);border-color:rgba(239,68,68,.18)}
+.tier-n{font-size:11px;font-weight:700;margin-bottom:1px}
+.tier.ex .tier-n{color:var(--green)}.tier.lk .tier-n{color:var(--accent)}.tier.pt .tier-n{color:var(--yellow)}.tier.mr .tier-n{color:var(--red)}
+.tier-r{font-size:10px;font-family:var(--mono);font-weight:500;color:var(--faint);margin-bottom:2px}
+.tier-d{font-size:10px;color:var(--faint);line-height:1.4}
+
+/* Skeleton */
+.sk-card{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-lg);border-left:3px solid var(--surface-3);padding:18px;margin-bottom:10px}
+.sk{border-radius:4px;background:linear-gradient(90deg,var(--surface-2) 25%,var(--surface-3) 50%,var(--surface-2) 75%);background-size:800px 100%;animation:shimmer 1.5s infinite}
+.sk-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+
+/* Result context header */
+.ctx{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin-bottom:12px;animation:fade-up .35s var(--spring)}
+.ctx-band{background:linear-gradient(135deg,#0c0e17,#161824);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.ctx-dir{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600}
+.ctx-sch{font-size:10px;font-family:var(--mono);color:var(--faint);background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--r-sm);padding:2px 6px}
+.cached-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;color:var(--green);background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2)}
+.ctx-body{padding:14px 16px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+@media(max-width:520px){.ctx-body{flex-direction:column}}
+.ctx-qlbl{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--faint);margin-bottom:4px}
+.ctx-q{font-size:17px;font-weight:700;color:var(--text)}
+.hs-box{background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.18);border-radius:var(--r-md);padding:10px 14px;text-align:right;flex-shrink:0}
+.hs-lbl{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(59,130,246,.55);margin-bottom:4px}
+.hs-code{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--accent);letter-spacing:1px}
+.hs-desc{font-size:10px;color:var(--faint);margin-top:2px;max-width:155px;line-height:1.4}
+.ctx-note{margin:0 16px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px 12px;font-size:11px;color:var(--faint);line-height:1.6}
+.ctx-note strong{color:var(--muted)}
+.ctx-tally{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:10px 16px;border-top:1px solid var(--border)}
+.tl{font-size:11px;color:var(--faint);margin-right:4px}
+.tb{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;border:1px solid}
+.tb-ex{color:var(--green);background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.2)}
+.tb-lk{color:var(--accent);background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.2)}
+.tb-pt{color:var(--yellow);background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.2)}
+.tb-mr{color:var(--red);background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.2)}
+.tb-warn{margin-left:auto;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;color:var(--red);background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2)}
+
+/* ── RESULT CARDS ── */
+.rc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);border-left:3px solid var(--border);overflow:hidden;margin-bottom:10px;transition:border-color .2s,box-shadow .2s,transform .2s var(--spring);animation:card-in .4s var(--spring) both}
+.rc:hover{border-color:var(--border-h);box-shadow:0 8px 36px rgba(0,0,0,.35);transform:translateY(-2px)}
+.rc.ex{border-left-color:var(--green)}.rc.lk{border-left-color:var(--accent)}.rc.pt{border-left-color:var(--yellow)}.rc.mr{border-left-color:var(--red)}
+.rc:nth-child(1){animation-delay:0ms}.rc:nth-child(2){animation-delay:80ms}.rc:nth-child(3){animation-delay:160ms}.rc:nth-child(4){animation-delay:240ms}.rc:nth-child(5){animation-delay:320ms}
+.rc-main{padding:16px;display:flex;gap:12px;align-items:flex-start}
+.rc-rank{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:2px}
+.rk-1{background:var(--text);color:var(--bg)}.rk-2{background:var(--surface-3);color:var(--muted);border:1px solid var(--border-h)}.rk-3,.rk-4,.rk-5{background:transparent;color:var(--faint);border:1px solid var(--border)}
+.rc-body{flex:1;min-width:0}
+.rc-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.rc-code{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--accent);letter-spacing:1px}
+.crown{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:#f59e0b;background:rgba(245,158,11,.09);border:1px solid rgba(245,158,11,.22);border-radius:20px;padding:2px 7px}
+.rate-tag{font-size:10px;font-family:var(--mono);font-weight:500;color:var(--faint);background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:2px 7px}
+.rc-desc{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:5px;font-weight:500}
+.rc-expl{font-size:12px;color:var(--faint);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.rc-meta{display:flex;align-items:center;gap:5px;margin-top:8px;flex-wrap:wrap}
+.mtag{display:inline-flex;align-items:center;gap:3px;font-size:10px;color:var(--faint);background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:2px 7px}
+.rc-conf{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.cb{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;border:1px solid}
+.cb-ex{color:var(--green);background:rgba(16,185,129,.09);border-color:rgba(16,185,129,.22)}
+.cb-lk{color:var(--accent);background:rgba(59,130,246,.09);border-color:rgba(59,130,246,.22)}
+.cb-pt{color:var(--yellow);background:rgba(245,158,11,.09);border-color:rgba(245,158,11,.22)}
+.cb-mr{color:var(--red);background:rgba(239,68,68,.09);border-color:rgba(239,68,68,.22)}
+.cb-bar{display:flex;align-items:center;gap:6px}
+.cb-track{width:78px;height:3px;background:var(--surface-3);border-radius:2px;overflow:hidden}
+.cb-fill{height:100%;border-radius:2px;animation:bar-fill .9s var(--spring) both}
+.cb-fill-ex{background:var(--green)}.cb-fill-lk{background:var(--accent)}.cb-fill-pt{background:var(--yellow)}.cb-fill-mr{background:var(--red)}
+.cb-pct{font-size:11px;font-weight:700;font-family:var(--mono);color:var(--muted);width:34px;text-align:right}
+.rc-expand{width:100%;padding:8px 16px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--faint);background:transparent;cursor:pointer;transition:background .15s,color .15s}
+.rc-expand:hover{background:var(--surface-2);color:var(--muted)}
+.chev{transition:transform .2s var(--spring)}.chev.open{transform:rotate(180deg)}
+.rc-details{display:none;padding:14px 16px;background:var(--surface-2);border-top:1px solid var(--border);gap:12px;animation:fade-up .2s var(--out)}
+.rc-details.open{display:grid;grid-template-columns:1fr 1fr}
+@media(max-width:560px){.rc-details.open{grid-template-columns:1fr}}
+.db{}.db.full{grid-column:1/-1}
+.db-lbl{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--faint);margin-bottom:5px;display:flex;align-items:center;gap:5px}
+.db-val{font-size:12px;color:var(--muted);line-height:1.6;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px 10px}
+.db-val.warn{color:rgba(245,158,11,.85);background:rgba(245,158,11,.05);border-color:rgba(245,158,11,.18)}
+
+/* ── HOW IT WORKS ── */
+.hiw{max-width:1200px;margin:56px auto;padding:0 24px}
+.sec-eye{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+.sec-h{font-size:24px;font-weight:700;color:var(--text);letter-spacing:-.5px}
+.sec-sub{font-size:14px;color:var(--faint);margin-top:6px;margin-bottom:28px}
+.hiw-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;position:relative}
+@media(max-width:700px){.hiw-grid{grid-template-columns:1fr}}
+.hiw-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);padding:24px;position:relative;transition:border-color .2s,box-shadow .2s}
+.hiw-card:hover{border-color:var(--border-h);box-shadow:0 4px 28px rgba(0,0,0,.35)}
+.hiw-n{font-family:var(--mono);font-size:48px;font-weight:700;color:var(--faint);opacity:.12;position:absolute;top:16px;right:20px;line-height:1}
+.hiw-ico{width:40px;height:40px;background:var(--accent-dim);border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;color:var(--accent);margin-bottom:14px}
+.hiw-t{font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px}
+.hiw-d{font-size:13px;color:var(--faint);line-height:1.65}
+
+/* ── FOOTER ── */
+.footer{border-top:1px solid var(--border);margin-top:48px}
+.foot-i{max-width:1200px;margin:0 auto;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.foot-l{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.foot-brand{font-size:13px;font-weight:600;color:var(--muted)}
+.foot-m{font-size:11px;color:var(--faint)}
+
+/* ── ERROR ── */
+.err-card{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.18);border-radius:var(--r-lg);padding:20px;display:flex;gap:12px;animation:fade-up .3s var(--spring)}
+.err-ico{width:32px;height:32px;border-radius:50%;background:rgba(239,68,68,.1);display:flex;align-items:center;justify-content:center;color:var(--red);flex-shrink:0}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ HEADER ═══════════ -->
+<header class="hdr">
+  <div class="hdr-i">
+    <a class="logo" href="#">
+      <div class="logo-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+        </svg>
+      </div>
+      <div><div class="logo-name">TariffMapper</div><span class="logo-sub">China ↔ Indonesia</span></div>
+    </a>
+    <nav class="nav" id="nav">
+      <div class="nav-ind" id="navInd"></div>
+      <button class="nav-tab active" data-tab="0">Overview</button>
+      <button class="nav-tab" data-tab="1">China CCC</button>
+      <button class="nav-tab" data-tab="2">Indonesia BTKI</button>
+      <button class="nav-tab" data-tab="3">HS Reference</button>
+    </nav>
+    <div class="gpt-wrap">
+      <div class="gpt-inner"><span class="gpt-dot"></span>GPT-4o</div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════ HERO ═══════════ -->
+<section class="hero">
+  <div class="hero-mesh"></div>
+  <div class="hero-i">
+    <div class="hero-eye">
+      <span class="badge badge-ai">AI-Powered</span>
+      <span class="badge badge-ver">Prototype v1.0</span>
+    </div>
+    <h1 class="hero-h1">Tariff Code Mapping</h1>
+    <div class="hero-sub">
+      <span class="cn">China</span>
+      <span class="hero-arrow">
+        <svg width="28" height="20" viewBox="0 0 28 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 10h24M18 4l6 6-6 6M10 4L4 10l6 6"/>
+        </svg>
+      </span>
+      <span class="id">Indonesia</span>
+    </div>
+    <p class="hero-desc">Map customs product classifications between China (CCC 2024) and Indonesia (BTKI/AHTN 2022). Search by product description, HS code, or national tariff code — receive top 5 matches ranked by AI confidence with traceable match logic.</p>
+    <div class="stats">
+      <div class="stat"><div class="stat-n" data-target="3">0</div><div class="stat-l">Tariff Schedules</div></div>
+      <div class="stat"><div class="stat-n" data-target="4">0</div><div class="stat-l">Match Types</div></div>
+      <div class="stat"><div class="stat-n" data-target="5">0</div><div class="stat-l">Results per Query</div></div>
+      <div class="stat"><div class="stat-n" style="font-size:22px" data-text="GPT-4o">—</div><div class="stat-l">AI Engine</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ MARQUEE ═══════════ -->
+<div class="mq">
+  <div class="mq-track" id="mq"></div>
+</div>
+
+<!-- ═══════════ DISCLAIMER ═══════════ -->
+<div class="disc">
+  <div class="disc-card">
+    <svg class="disc-ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <p class="disc-txt"><strong>Research and informational use only.</strong> This tool does not constitute a binding tariff ruling or legal customs advice. Always verify classifications with official customs authorities (China Customs, Direktorat Jenderal Bea dan Cukai Indonesia) before importation or exportation.</p>
+  </div>
+</div>
+
+<!-- ═══════════ MAIN LAYOUT ═══════════ -->
+<div class="layout">
+
+  <!-- LEFT: Search panel -->
+  <div class="panel sp p-z" id="searchPanel">
+    <div class="sp-head p-z">
+      <div class="sp-lbl">Classification Search</div>
+      <div class="sp-title">Find Tariff Codes</div>
+      <div class="sp-sub">Select direction, input type, and enter your query.</div>
+    </div>
+    <div class="divider"></div>
+    <div class="sp-body p-z">
+
+      <!-- Direction -->
+      <div class="sec">
+        <div class="sec-lbl">Mapping Direction</div>
+        <div class="dir-grid">
+          <button class="dir-btn cn-id active" id="btnCnId" onclick="setDir('cn_id')">
+            <span class="dir-flag">🇨🇳</span>
+            <svg class="dir-arr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            <span class="dir-flag">🇮🇩</span>
+            <span style="font-size:10px;margin-left:2px;opacity:.7">Indonesia</span>
+          </button>
+          <button class="dir-btn id-cn" id="btnIdCn" onclick="setDir('id_cn')">
+            <span class="dir-flag">🇮🇩</span>
+            <svg class="dir-arr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            <span class="dir-flag">🇨🇳</span>
+            <span style="font-size:10px;margin-left:2px;opacity:.7">China</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Search mode -->
+      <div class="sec">
+        <div class="sec-lbl">Input Type</div>
+        <div class="seg" id="seg">
+          <div class="seg-ind" id="segInd"></div>
+          <button class="seg-btn active" data-mode="description">Description</button>
+          <button class="seg-btn" data-mode="hs_code">HS Code</button>
+          <button class="seg-btn" data-mode="local_code">Local Code</button>
+        </div>
+      </div>
+
+      <!-- Input -->
+      <div class="sec">
+        <div class="sec-lbl" id="inputLabel">Product Description</div>
+        <div class="inp-wrap">
+          <input class="inp" id="queryInput" type="text" autocomplete="off" spellcheck="false">
+          <svg class="inp-ico" id="inpIco" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span class="inp-shortcut">⌘K</span>
+        </div>
+        <div class="chips" id="chips"></div>
+      </div>
+
+      <!-- Button -->
+      <div class="sec" style="margin-bottom:0">
+        <button class="srch-btn" id="searchBtn" onclick="doSearch()">
+          <svg class="btn-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span class="btn-lbl">Find Tariff Matches</span>
+          <div class="srch-spin"></div>
+        </button>
+      </div>
+
+      <!-- Sources -->
+      <div class="sources">
+        <div class="sources-ttl">Reference Sources</div>
+        <div class="src-item"><span class="src-dot"></span>WCO HS 2022 Nomenclature</div>
+        <div class="src-item"><span class="src-dot"></span>China CCC Tariff Schedule 2024</div>
+        <div class="src-item"><span class="src-dot"></span>Indonesia BTKI 2022 (AHTN-based)</div>
+        <div class="src-item"><span class="src-dot"></span>ASEAN AHTN 2022</div>
+        <div class="src-item"><span class="src-dot"></span>ACFTA / RCEP Preferential Schedules</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Results panel -->
+  <div class="panel rp p-z" id="resultsPanel">
+    <div id="resultsContent"></div>
+  </div>
+
+</div>
+
+<!-- ═══════════ HOW IT WORKS ═══════════ -->
+<section class="hiw">
+  <div class="sec-eye">How it works</div>
+  <div class="sec-h">Three steps to a tariff match</div>
+  <div class="sec-sub">From raw query to classified, cited, confidence-ranked output.</div>
+  <div class="hiw-grid">
+    <div class="hiw-card">
+      <div class="hiw-n">01</div>
+      <div class="hiw-ico"><i data-lucide="pen-line" width="18" height="18"></i></div>
+      <div class="hiw-t">Enter Your Query</div>
+      <div class="hiw-d">Input a product description, 6-digit international HS code, or full national tariff code (China CCC or Indonesia BTKI).</div>
+    </div>
+    <div class="hiw-card">
+      <div class="hiw-n">02</div>
+      <div class="hiw-ico"><i data-lucide="brain-circuit" width="18" height="18"></i></div>
+      <div class="hiw-t">AI Anchors to HS</div>
+      <div class="hiw-d">GPT-4o resolves the input to a 6-digit international HS anchor, handling ambiguous, incomplete, and multi-chapter descriptions.</div>
+    </div>
+    <div class="hiw-card">
+      <div class="hiw-n">03</div>
+      <div class="hiw-ico"><i data-lucide="bar-chart-3" width="18" height="18"></i></div>
+      <div class="hiw-t">Top 5 Returned</div>
+      <div class="hiw-d">Target-country national codes ranked by confidence %, with tariff rates, traceable match logic, divergence notes, and source citations.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer class="footer">
+  <div class="foot-i">
+    <div class="foot-l">
+      <span class="foot-brand">TariffMapper</span>
+      <span class="foot-m">Tsunami Advisors · HS 2022 · CCC 2024 · BTKI 2022 · AHTN 2022</span>
+    </div>
+    <span class="foot-m">Research use only · Not legal customs advice</span>
+  </div>
+</footer>
+
+<script>
+/* ═══════════════════════════════════════
+   STATE
+═══════════════════════════════════════ */
+let DIR = 'cn_id', MODE = 'description';
+
+const CHIPS = {
+  description: ['crude palm oil','laptop computer','EV battery cells','woven cotton fabric','smartphone'],
+  hs_code:     ['151110','847130','854360','870380','520811'],
+  local_code:  ['1511100000','8471301000','8507600090','5208110010'],
+};
+
+const LABELS = {
+  description: { cn_id:'Product Description', id_cn:'Product Description' },
+  hs_code:     { cn_id:'HS Code (6-digit)', id_cn:'HS Code (6-digit)' },
+  local_code:  { cn_id:'China CCC Code', id_cn:'Indonesia BTKI Code' },
+};
+
+const PLACEHOLDERS = {
+  description: ['crude palm oil','EV battery cells','laptop computer','woven cotton fabric'],
+  hs_code:     ['151110','847130','854360','870380'],
+  local_code:  ['1511100000','8471301000','8507600090'],
+};
+
+/* ═══════════════════════════════════════
+   MOCK DATA
+═══════════════════════════════════════ */
+const MOCK = {
+  'palm': {
+    hsAnchor:'151110', hsAnchorDesc:'Palm oil, crude',
+    note:'Input identified as crude palm oil (HS Chapter 15). Both China CCC 2024 and Indonesia BTKI 2022 share the 10-digit extension for crude palm oil — this is expected for major agricultural commodities.',
+    matches:[
+      { rank:1,code:'1511100000',desc:'Crude palm oil',conf:95,type:'exact',rate:'MFN 9%',tariffNote:'ACFTA 0% preferential rate; RCEP 0% for eligible origin',src:'China CCC 2024, Chapter 15; WCO HS 2022',basis:'Shared HS digit prefix',div:'Both CN and ID use identical 10-digit extension for crude palm oil — no divergence at national level',expl:'Direct HS extension match. China CCC 2024 extends HS 151110 to 1511100000 for unmodified crude palm oil. This commodity is atypical in that both countries share the same 10-digit code due to global harmonisation pressure on major agri-commodities.' },
+      { rank:2,code:'1511900000',desc:'Palm oil and fractions, refined but not chemically modified — other',conf:73,type:'likely',rate:'MFN 9%',tariffNote:'Covers RBD palm oil if not chemically modified',src:'China CCC 2024, Chapter 15; WCO HS 2022',basis:'Shared HS digit prefix',div:'Sub-heading 1511.90 covers refined fractions — applicable if product underwent any processing before export',expl:'If the palm oil has been refined (RBD — Refined, Bleached, Deodorised), this code applies instead of 1511100000. The distinction between crude and refined is critical for customs valuation and tariff determination.' },
+      { rank:3,code:'1511901000',desc:'Palm olein (liquid fraction of refined palm oil)',conf:56,type:'partial',rate:'MFN 9%',tariffNote:'Specific to palm olein — widely traded in cooking oil production',src:'China CCC 2024, Chapter 15',basis:'Tariff structure logic',div:'China CCC distinguishes palm olein from palm stearin at 10-digit level; BTKI uses the same AHTN sub-heading',expl:'Palm olein is the liquid fraction of refined palm oil. If the product is a palm olein fraction, this code applies at the 10-digit level under China CCC. The split from 1511900000 is a national extension unique to China CCC 2024.' },
+      { rank:4,code:'1511902000',desc:'Palm stearin (solid fraction of refined palm oil)',conf:42,type:'partial',rate:'MFN 9%',tariffNote:'Used in food and oleochemical manufacturing',src:'China CCC 2024, Chapter 15; ACFTA Schedule',basis:'Tariff structure logic',div:'China CCC distinguishes stearin from olein; Indonesia BTKI uses a broader 8-digit sub-heading',expl:"Palm stearin is the solid fraction. Included as a partial match because 'palm oil' as a generic description may encompass both liquid and solid fractions depending on the production and processing stage." },
+      { rank:5,code:'1516200090',desc:'Vegetable fats and oils, hydrogenated — other',conf:22,type:'manual_review',rate:'MFN 10%',tariffNote:'Only applies if palm oil is chemically modified (hydrogenated)',src:'China CCC 2024, Chapter 15; WCO HS 2022',basis:'Semantic description similarity',div:'Chapter 15.16 applies only to chemically modified fats — verify product specification before applying this code',expl:'Manual review required: this code applies only to hydrogenated or chemically modified palm derivatives. If the product description is ambiguous regarding chemical modification, consult a customs specialist before filing a declaration.' },
+    ]
+  },
+  'laptop': {
+    hsAnchor:'847130', hsAnchorDesc:'Portable ADP machines, ≤10 kg',
+    note:'Input identified as portable computing device (laptop/notebook). HS 847130 is the international 6-digit anchor for portable ADP machines under 10 kg (Chapter 84).',
+    matches:[
+      { rank:1,code:'8471301000',desc:'Portable automatic data processing machines — laptop computers',conf:92,type:'exact',rate:'MFN 0%',tariffNote:'ITA (Information Technology Agreement) — zero tariff for laptops',src:'Indonesia BTKI 2022, Chapter 84; WCO HS 2022',basis:'Shared HS digit prefix',div:'Indonesia BTKI uses 8471301000 for laptops; China CCC sub-divides by display technology at 10-digit level',expl:"Direct extension of HS 847130. Indonesia's BTKI classifies laptops under a specific 10-digit code, benefiting from ITA zero-tariff treatment. MFN rate is 0% under the WTO Information Technology Agreement." },
+      { rank:2,code:'8471302000',desc:'Portable ADP machines — tablet computers',conf:67,type:'likely',rate:'MFN 0%',tariffNote:'ITA zero tariff — verify device specification (no permanently attached keyboard)',src:'Indonesia BTKI 2022, Chapter 84',basis:'Shared HS digit prefix',div:'BTKI separates tablets from laptops at 10-digit; ambiguity exists for 2-in-1 convertible devices',expl:'If the device is a tablet (no permanently attached keyboard), BTKI classifies under 8471302000. The distinction is relevant for 2-in-1 convertibles — primary operating mode determines classification.' },
+      { rank:3,code:'8471309000',desc:'Portable ADP machines — other (including convertibles)',conf:52,type:'partial',rate:'MFN 0%',tariffNote:'Catch-all for non-standard portable ADP devices',src:'Indonesia BTKI 2022, Chapter 84; AHTN 2022',basis:'ASEAN AHTN extension logic',div:'2-in-1 convertibles may fall under 8471301000 or 8471309000 — AHTN does not specify explicitly',expl:'Hybrid and convertible devices not clearly classifiable as laptops or tablets fall under this category. Classification depends on the primary function and hardware configuration of the device.' },
+      { rank:4,code:'8471410000',desc:'ADP machines — comprising a processing unit and I/O unit in the same housing',conf:35,type:'manual_review',rate:'MFN 0%',tariffNote:'ITA applies — classification dispute possible for high-end mobile workstations',src:'Indonesia BTKI 2022, Chapter 84',basis:'Tariff structure logic',div:'High-performance mobile workstations exceeding typical laptop specs may be reclassified here',expl:'Manual review required: professional mobile workstations may be excluded from 847130 if they exceed the typical laptop specification threshold. Verify weight and processing unit configuration against BTKI classification criteria.' },
+      { rank:5,code:'8528720000',desc:'Monitors and projectors — other, not incorporating television reception apparatus',conf:20,type:'manual_review',rate:'MFN 5%',tariffNote:'Only if device is primarily a display unit — edge case',src:'Indonesia BTKI 2022, Chapter 85; WCO HS 2022',basis:'Semantic description similarity',div:'All-in-one display-computing hybrids may be reclassified to Chapter 85 if display is the primary component',expl:'Manual review required: all-in-one computing displays may be reclassified to Chapter 85. This is a low-probability edge case requiring physical inspection and determination of the essential character of the article.' },
+    ]
+  },
+  'battery': {
+    hsAnchor:'850760', hsAnchorDesc:'Lithium-ion accumulators',
+    note:'Input identified as lithium-ion battery/accumulator cells for electric vehicles. HS 850760 covers lithium-ion accumulators — introduced in HS 2017, updated in HS 2022 to reflect EV industry growth.',
+    matches:[
+      { rank:1,code:'8507601000',desc:'Lithium-ion accumulators — for use in electric vehicles (traction batteries)',conf:91,type:'exact',rate:'MFN 5%',tariffNote:'ACFTA 0%; RCEP phased reduction to 0% by 2027',src:'Indonesia BTKI 2022, Chapter 85; WCO HS 2022',basis:'Shared HS digit prefix',div:'National extension specifies EV end-use — aligns precisely with product description; China CCC uses same extension',expl:"Direct national extension for EV traction batteries. Indonesia BTKI 2022 introduced sub-heading 8507601000 specifically for EV traction battery cells, aligned with ASEAN AHTN update reflecting EV industry expansion." },
+      { rank:2,code:'8507600090',desc:'Lithium-ion accumulators — other (non-EV applications)',conf:70,type:'likely',rate:'MFN 5%',tariffNote:'Covers consumer electronics, stationary energy storage',src:'Indonesia BTKI 2022, Chapter 85',basis:'Shared HS digit prefix',div:'End-use documentation distinguishing EV traction from other applications may be required by Bea Cukai',expl:"If the battery cells are not specifically for EV traction (consumer electronics, stationary storage, industrial), this code applies. End-use declarations may be required to avoid misclassification." },
+      { rank:3,code:'8507800000',desc:'Electric accumulators — other (non-lithium-ion chemistries)',conf:44,type:'partial',rate:'MFN 5%',tariffNote:'Applies to solid-state, sodium-ion, or other non-lithium battery chemistries',src:'Indonesia BTKI 2022, Chapter 85; AHTN 2022',basis:'Tariff structure logic',div:'Next-generation solid-state batteries may not classify under 850760 if chemistry diverges from lithium-ion',expl:'Included as partial match for non-standard battery chemistries. Sodium-ion, solid-state, or hybrid batteries may not qualify as lithium-ion accumulators under the HS definition and fall under this broader heading.' },
+      { rank:4,code:'8507100000',desc:'Lead-acid accumulators — for starting piston engines',conf:28,type:'manual_review',rate:'MFN 10%',tariffNote:'Higher MFN rate — ensure correct classification to avoid overpayment',src:'Indonesia BTKI 2022, Chapter 85',basis:'Tariff structure logic',div:'Hybrid vehicles contain both lead-acid starter and lithium-ion traction batteries — each must be classified separately',expl:'Manual review required: hybrid vehicles often contain both battery types. Incorrect classification as lead-acid incurs a 10% MFN rate vs 5% for lithium-ion. Each battery type must be declared separately with clear specifications.' },
+      { rank:5,code:'8544420000',desc:'Insulated wire, cable — for voltages ≤1000V (battery pack integrated wiring)',conf:18,type:'manual_review',rate:'MFN 5%',tariffNote:'Only if classified as cable assembly with integrated connectors',src:'Indonesia BTKI 2022, Chapter 85',basis:'Semantic description similarity',div:'Battery modules with integrated wiring harnesses may require split classification across headings 8507 and 8544',expl:'Manual review required: battery modules supplied with integrated wiring harnesses may require split classification. The battery cells and the cable assembly may need to be declared separately under the principal component rule.' },
+    ]
+  },
+  'cotton': {
+    hsAnchor:'520811', hsAnchorDesc:'Woven fabrics of cotton, ≥85%, plain weave, ≤100 g/m²',
+    note:"Input identified as woven cotton fabric. Key classification variables: cotton percentage (≥85%), weave type, fabric weight (g/m²), and finishing state (unbleached/bleached/dyed/printed). All four variables affect the precise sub-heading.",
+    matches:[
+      { rank:1,code:'5208110010',desc:'Woven fabrics of cotton, ≥85%, plain weave, ≤100 g/m² — unbleached (greige)',conf:82,type:'likely',rate:'MFN 15%',tariffNote:'ACFTA 0% for qualified ASEAN-origin cotton fabric',src:'Indonesia BTKI 2022, Chapter 52; WCO HS 2022',basis:'Shared HS digit prefix',div:"Indonesia sub-divides by finishing state (unbleached/bleached/dyed/printed) at 10-digit — China CCC uses similar structure",expl:"Indonesia BTKI distinguishes fabric finishing state at the 10-digit level. The 'unbleached' sub-heading applies to greige (natural state) fabric. Verify the finishing state before applying — incorrect finishing state is a frequent customs audit trigger." },
+      { rank:2,code:'5208120010',desc:'Woven fabrics of cotton, ≥85%, plain weave, >100 g/m² — unbleached',conf:67,type:'likely',rate:'MFN 15%',tariffNote:'Weight threshold is 100 g/m² — verify with certified fabric test',src:'Indonesia BTKI 2022, Chapter 52; AHTN 2022',basis:'Shared HS digit prefix',div:'Sub-heading split by weight threshold at 100 g/m² — requires certified fabric weight documentation',expl:'The 100 g/m² weight threshold is the key differentiator. Heavy plain-weave cotton (canvas, drill, denim base) typically falls here. A certified fabric test report confirming weight is required for customs clearance in Indonesia.' },
+      { rank:3,code:'5208210010',desc:'Woven fabrics of cotton, ≥85%, plain weave, ≤100 g/m² — bleached',conf:55,type:'partial',rate:'MFN 15%',tariffNote:'Chemically bleached fabric — finishing certificate required',src:'Indonesia BTKI 2022, Chapter 52',basis:'Tariff structure logic',div:"Bleaching status shifts the sub-heading — a common misclassification error between 5208.11 and 5208.21",expl:"If the fabric has been bleached but not dyed or printed, this code applies. The bleaching/unbleached distinction is significant and a frequent area of customs scrutiny. A finishing certificate documenting the bleaching process is advisable." },
+      { rank:4,code:'5208310010',desc:'Woven fabrics of cotton, ≥85%, plain weave, ≤100 g/m² — uniformly dyed',conf:42,type:'partial',rate:'MFN 15%',tariffNote:'Single-color dyed fabric — not printed pattern',src:'Indonesia BTKI 2022, Chapter 52',basis:'Tariff structure logic',div:'Dyed fabric has a different sub-heading than undyed or printed — ensure production stage is accurately declared',expl:'Uniformly dyed cotton fabric (single-color, yarn-dyed, or piece-dyed) falls under this heading. The key distinction from printed fabric (5208410010) is uniform color rather than a surface-applied pattern.' },
+      { rank:5,code:'5208410010',desc:'Woven fabrics of cotton, ≥85%, plain weave, ≤100 g/m² — printed',conf:33,type:'manual_review',rate:'MFN 15%',tariffNote:'Printed pattern fabric — design documentation and color samples required',src:'Indonesia BTKI 2022, Chapter 52; WCO HS 2022',basis:'Tariff structure logic',div:"Design card and color scheme documentation may be requested by Bea Cukai for verification",expl:'Manual review required: if the fabric has any printed pattern, this code applies regardless of base fabric color. Indonesian customs authorities may request design cards and color samples to verify the printed classification.' },
+    ]
+  }
+};
+
+function findMock(q, dir) {
+  const s = q.toLowerCase().trim();
+  const keyMap = [
+    [['palm','151110','1511100000','15119','1511'], 'palm'],
+    [['laptop','computer','notebook','847130','8471301000','84713'], 'laptop'],
+    [['battery','lithium','ev bat','850760','8507600090','8507601000','85076'], 'battery'],
+    [['cotton','fabric','woven','520811','5208110010','52081'], 'cotton'],
+  ];
+  for(const [keys, dataKey] of keyMap) {
+    if(keys.some(k => s.includes(k))) return {
+      ...JSON.parse(JSON.stringify(MOCK[dataKey])), query:q, direction:dir
+    };
+  }
+  // Default
+  return {
+    query:q, direction:dir, hsAnchor:'847190', hsAnchorDesc:'ADP machines — other',
+    note:'Query processed via semantic analysis. Multiple classification paths possible — review confidence scores carefully.',
+    matches:[
+      { rank:1,code:dir==='cn_id'?'8471900000':'8471901000',desc:'Other automatic data processing machines and units thereof',conf:68,type:'likely',rate:'MFN 0%',tariffNote:'ITA zero tariff may apply — verify eligibility',src:dir==='cn_id'?'Indonesia BTKI 2022, Chapter 84':'China CCC 2024, Chapter 84',basis:'Semantic description similarity',div:'Catch-all heading — precise classification requires detailed product specification',expl:'Based on semantic analysis, HS 8471.90 was identified as the most likely anchor. This is a broad catch-all heading. A precise classification requires a detailed technical datasheet.' },
+      { rank:2,code:dir==='cn_id'?'8543709090':'8543709010',desc:'Electrical machines and apparatus — other (not elsewhere classified)',conf:52,type:'partial',rate:'MFN 5%',tariffNote:'Broad catch-all for electronic apparatus',src:dir==='cn_id'?'Indonesia BTKI 2022, Chapter 85':'China CCC 2024, Chapter 85',basis:'Tariff structure logic',div:'Chapter 85 may apply if primary function is electrical/electronic rather than data processing',expl:"If the product's primary function is electrical or electronic rather than data processing, Chapter 85 may be more appropriate. The Essential Character Rule applies." },
+      { rank:3,code:dir==='cn_id'?'8479899090':'8479899010',desc:'Machines and mechanical appliances — other (not elsewhere specified)',conf:38,type:'partial',rate:'MFN 5%',tariffNote:'Broad mechanical catch-all',src:dir==='cn_id'?'Indonesia BTKI 2022, Chapter 84':'China CCC 2024, Chapter 84',basis:'Tariff structure logic',div:'Chapter 84 mechanical heading used as fallback when digital classification is uncertain',expl:'Included as partial match for products with significant mechanical components alongside digital features. This catch-all heading is used when classification under more specific headings is disputed.' },
+      { rank:4,code:dir==='cn_id'?'8528590000':'8528590010',desc:'Monitors and projectors — other',conf:27,type:'manual_review',rate:'MFN 5%',tariffNote:'Only if primary function is display output',src:dir==='cn_id'?'Indonesia BTKI 2022, Chapter 85':'China CCC 2024, Chapter 85',basis:'Semantic description similarity',div:'Display-centric products may cross Chapter 84/85 boundary',expl:"Manual review required: if the product's primary function involves display output, reclassification to Chapter 85 may be appropriate. The Chapter 84/85 boundary requires careful assessment of principal function." },
+      { rank:5,code:dir==='cn_id'?'9013809090':'9013809010',desc:'Liquid crystal devices and other optical instruments — other',conf:16,type:'manual_review',rate:'MFN 10%',tariffNote:'Chapter 90 — specialist customs classification required',src:dir==='cn_id'?'Indonesia BTKI 2022, Chapter 90':'China CCC 2024, Chapter 90',basis:'Semantic description similarity',div:'Optical-electronic hybrid products may require Chapter 90 — specialist review required',expl:'Manual review required: products incorporating optical components may fall under Chapter 90. This has significant tariff implications (+5% vs Chapter 84/85) and requires specialist customs classification review.' },
+    ]
+  };
+}
+
+/* ═══════════════════════════════════════
+   RENDER — EMPTY STATE
+═══════════════════════════════════════ */
+function renderEmpty() {
+  document.getElementById('resultsContent').innerHTML = `
+    <div class="empty p-z">
+      <div class="empty-ico">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+      </div>
+      <div class="empty-title">Ready to map your first code</div>
+      <div class="empty-desc">Enter a product description or tariff code on the left to see the top 5 classified matches with AI confidence scores.</div>
+      <div class="steps3">
+        <div class="step3"><div class="s3-n">01</div><div class="s3-ico"><i data-lucide="pen-line" width="14" height="14"></i></div><div class="s3-t">Enter Your Query</div><div class="s3-d">Product description, 6-digit HS code, or national code (CCC or BTKI).</div></div>
+        <div class="step3"><div class="s3-n">02</div><div class="s3-ico"><i data-lucide="cpu" width="14" height="14"></i></div><div class="s3-t">AI Anchors to HS</div><div class="s3-d">GPT-4o resolves the input to a 6-digit international HS anchor.</div></div>
+        <div class="step3"><div class="s3-n">03</div><div class="s3-ico"><i data-lucide="list-ordered" width="14" height="14"></i></div><div class="s3-t">Top 5 Returned</div><div class="s3-d">Ranked codes with confidence %, tariff rates, match logic, and citations.</div></div>
+      </div>
+      <div class="tiers">
+        <div class="tier ex"><div class="tier-n">Exact</div><div class="tier-r">85–100%</div><div class="tier-d">Direct HS + national code match</div></div>
+        <div class="tier lk"><div class="tier-n">Likely</div><div class="tier-r">65–84%</div><div class="tier-d">HS match, minor sub-heading ambiguity</div></div>
+        <div class="tier pt"><div class="tier-n">Partial</div><div class="tier-r">40–64%</div><div class="tier-d">Adjacent HS or chapter-level only</div></div>
+        <div class="tier mr"><div class="tier-n">Review</div><div class="tier-r">0–39%</div><div class="tier-d">Ambiguous — consult specialist</div></div>
+      </div>
+    </div>`;
+  lucide.createIcons();
+}
+
+/* ═══════════════════════════════════════
+   RENDER — SKELETON
+═══════════════════════════════════════ */
+function renderSkeleton() {
+  let html = `<div class="p-z" style="padding:16px">`;
+  for(let i=0;i<5;i++) {
+    html += `<div class="sk-card">
+      <div class="sk-row">
+        <div class="sk" style="width:24px;height:24px;border-radius:50%;flex-shrink:0"></div>
+        <div style="flex:1">
+          <div class="sk" style="width:160px;height:18px;margin-bottom:8px"></div>
+          <div class="sk" style="width:240px;height:13px;margin-bottom:6px"></div>
+          <div class="sk" style="width:200px;height:13px"></div>
+        </div>
+        <div>
+          <div class="sk" style="width:90px;height:22px;border-radius:20px;margin-bottom:8px"></div>
+          <div class="sk" style="width:90px;height:8px;border-radius:4px"></div>
+        </div>
+      </div>
+    </div>`;
+  }
+  html += `<div style="text-align:center;padding:8px 0;font-size:12px;color:var(--faint);display:flex;align-items:center;justify-content:center;gap:8px">
+    <div style="width:14px;height:14px;border:2px solid rgba(255,255,255,.1);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite"></div>
+    Querying AI mapping engine… typically 5–15 seconds
+  </div></div>`;
+  document.getElementById('resultsContent').innerHTML = html;
+}
+
+/* ═══════════════════════════════════════
+   RENDER — RESULTS
+═══════════════════════════════════════ */
+const TYPE = { exact:{cls:'ex',cbCls:'cb-ex',fillCls:'cb-fill-ex',label:'Exact Match'}, likely:{cls:'lk',cbCls:'cb-lk',fillCls:'cb-fill-lk',label:'Likely Match'}, partial:{cls:'pt',cbCls:'cb-pt',fillCls:'cb-fill-pt',label:'Partial Match'}, manual_review:{cls:'mr',cbCls:'cb-mr',fillCls:'cb-fill-mr',label:'Manual Review'} };
+const DIR_LABELS = {
+  cn_id:{ src:'🇨🇳 China', tgt:'🇮🇩 Indonesia', srcSch:'CCC 2024', tgtSch:'BTKI 2022' },
+  id_cn:{ src:'🇮🇩 Indonesia', tgt:'🇨🇳 China', srcSch:'BTKI 2022', tgtSch:'CCC 2024' },
+};
+
+function renderResults(data) {
+  const dl = DIR_LABELS[data.direction] || DIR_LABELS['cn_id'];
+  const counts = { exact:0, likely:0, partial:0, manual_review:0 };
+  data.matches.forEach(m => counts[m.type]=(counts[m.type]||0)+1);
+  const mrCount = counts.manual_review || 0;
+
+  // Tally badges
+  let tallyHTML = `<span class="tl">Results:</span>`;
+  if(counts.exact)         tallyHTML += `<span class="tb tb-ex">${counts.exact} Exact</span>`;
+  if(counts.likely)        tallyHTML += `<span class="tb tb-lk">${counts.likely} Likely</span>`;
+  if(counts.partial)       tallyHTML += `<span class="tb tb-pt">${counts.partial} Partial</span>`;
+  if(counts.manual_review) tallyHTML += `<span class="tb tb-mr">${counts.manual_review} Review</span>`;
+  if(mrCount > 0)          tallyHTML += `<span class="tb-warn" style="margin-left:auto">⚠ ${mrCount} require${mrCount===1?'s':''} manual review</span>`;
+
+  // Cards
+  let cardsHTML = '';
+  data.matches.forEach((m, i) => {
+    const t = TYPE[m.type] || TYPE.likely;
+    const isBest = i === 0;
+    cardsHTML += `
+      <div class="rc ${t.cls}">
+        <div class="rc-main">
+          <div class="rc-rank rk-${i+1}">${i+1}</div>
+          <div class="rc-body">
+            <div class="rc-row">
+              <span class="rc-code">${m.code}</span>
+              ${isBest?`<span class="crown">⭐ Best Match</span>`:''}
+              ${m.rate?`<span class="rate-tag">${m.rate}</span>`:''}
+            </div>
+            <div class="rc-desc">${m.desc}</div>
+            <div class="rc-expl">${m.expl}</div>
+            <div class="rc-meta">
+              <span class="mtag">📐 ${m.basis}</span>
+              <span class="mtag">📚 ${m.src}</span>
+            </div>
+          </div>
+          <div class="rc-conf">
+            <div class="${t.cbCls} cb">${t.label}</div>
+            <div class="cb-bar">
+              <div class="cb-track"><div class="${t.fillCls} cb-fill" style="width:${m.conf}%"></div></div>
+              <span class="cb-pct">${m.conf}%</span>
+            </div>
+          </div>
+        </div>
+        <button class="rc-expand" onclick="toggleExpand(this)">
+          <span>Show tariff &amp; divergence details</span>
+          <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="rc-details">
+          ${m.tariffNote?`<div class="db"><div class="db-lbl">💰 Tariff Notes</div><div class="db-val">${m.tariffNote}</div></div>`:''}
+          ${m.div?`<div class="db"><div class="db-lbl">⚠ Divergence Note</div><div class="db-val warn">${m.div}</div></div>`:''}
+          <div class="db full"><div class="db-lbl">📝 Full Explanation</div><div class="db-val">${m.expl}</div></div>
+        </div>
+      </div>`;
+  });
+
+  document.getElementById('resultsContent').innerHTML = `
+    <div class="p-z" style="padding:16px">
+      <div class="ctx">
+        <div class="ctx-band">
+          <div class="ctx-dir">
+            <span>${dl.src}</span>
+            <span class="ctx-sch">${dl.srcSch}</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--faint)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            <span class="ctx-sch">${dl.tgtSch}</span>
+            <span>${dl.tgt}</span>
+          </div>
+        </div>
+        <div class="ctx-body">
+          <div>
+            <div class="ctx-qlbl">Query</div>
+            <div class="ctx-q">"${data.query}"</div>
+          </div>
+          <div class="hs-box">
+            <div class="hs-lbl">HS Anchor</div>
+            <div class="hs-code">${data.hsAnchor}</div>
+            <div class="hs-desc">${data.hsAnchorDesc}</div>
+          </div>
+        </div>
+        ${data.note?`<div class="ctx-note"><strong>AI Note: </strong>${data.note}</div>`:''}
+        <div class="ctx-tally">${tallyHTML}</div>
+      </div>
+      ${cardsHTML}
+    </div>`;
+  lucide.createIcons();
+}
+
+/* ═══════════════════════════════════════
+   SEARCH LOGIC
+═══════════════════════════════════════ */
+function doSearch() {
+  const q = document.getElementById('queryInput').value.trim();
+  if(!q) return;
+  const btn = document.getElementById('searchBtn');
+  btn.classList.add('loading');
+  btn.disabled = true;
+  renderSkeleton();
+  setTimeout(() => {
+    const data = findMock(q, DIR);
+    renderResults(data);
+    btn.classList.remove('loading');
+    btn.disabled = false;
+  }, 1600 + Math.random()*800);
+}
+
+function toggleExpand(btn) {
+  const details = btn.nextElementSibling;
+  const chev = btn.querySelector('.chev');
+  const isOpen = details.classList.contains('open');
+  details.classList.toggle('open', !isOpen);
+  chev.classList.toggle('open', !isOpen);
+  btn.querySelector('span').textContent = isOpen ? 'Show tariff & divergence details' : 'Hide details';
+}
+
+/* ═══════════════════════════════════════
+   DIRECTION TOGGLE
+═══════════════════════════════════════ */
+function setDir(dir) {
+  DIR = dir;
+  document.getElementById('btnCnId').classList.toggle('active', dir==='cn_id');
+  document.getElementById('btnIdCn').classList.toggle('active', dir==='id_cn');
+  updateInputLabel();
+  updateChips();
+  // Clear results back to empty
+  renderEmpty();
+  document.getElementById('queryInput').value = '';
+}
+
+/* ═══════════════════════════════════════
+   SEGMENT CONTROL
+═══════════════════════════════════════ */
+function initSegment() {
+  const seg = document.getElementById('seg');
+  const ind = document.getElementById('segInd');
+  const btns = seg.querySelectorAll('.seg-btn');
+  function updateInd(btn) {
+    ind.style.left = btn.offsetLeft + 'px';
+    ind.style.width = btn.offsetWidth + 'px';
+  }
+  btns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      btns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      MODE = btn.dataset.mode;
+      updateInd(btn);
+      updateInputLabel();
+      updateChips();
+      document.getElementById('queryInput').value = '';
+      renderEmpty();
+    });
+  });
+  // Initial
+  const active = seg.querySelector('.seg-btn.active');
+  if(active) setTimeout(() => updateInd(active), 50);
+  window.addEventListener('resize', () => {
+    const a = seg.querySelector('.seg-btn.active');
+    if(a) updateInd(a);
+  });
+}
+
+function updateInputLabel() {
+  document.getElementById('inputLabel').textContent = LABELS[MODE]?.[DIR] || 'Query';
+  const ph = PLACEHOLDERS[MODE];
+  document.getElementById('queryInput').placeholder = ph ? ph[0] : '';
+}
+
+function updateChips() {
+  const container = document.getElementById('chips');
+  const list = CHIPS[MODE] || [];
+  container.innerHTML = '';
+  list.forEach((c, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'chip';
+    btn.textContent = c;
+    btn.style.animationDelay = (i * 50) + 'ms';
+    btn.onclick = () => {
+      document.getElementById('queryInput').value = c;
+    };
+    container.appendChild(btn);
+  });
+}
+
+/* ═══════════════════════════════════════
+   NAV TABS
+═══════════════════════════════════════ */
+function initNav() {
+  const nav = document.getElementById('nav');
+  const ind = document.getElementById('navInd');
+  const tabs = nav.querySelectorAll('.nav-tab');
+  function updateInd(tab) {
+    ind.style.left = (tab.offsetLeft) + 'px';
+    ind.style.width = tab.offsetWidth + 'px';
+    ind.style.top = '0';
+    ind.style.height = '100%';
+  }
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      updateInd(tab);
+    });
+  });
+  const active = nav.querySelector('.nav-tab.active');
+  if(active) setTimeout(() => updateInd(active), 60);
+  window.addEventListener('resize', () => {
+    const a = nav.querySelector('.nav-tab.active');
+    if(a) updateInd(a);
+  });
+}
+
+/* ═══════════════════════════════════════
+   MARQUEE
+═══════════════════════════════════════ */
+function initMarquee() {
+  const items = ['WCO HS 2022','China CCC 2024','Indonesia BTKI 2022','ASEAN AHTN 2022','Bea Cukai Indonesia','China Customs','ACFTA Schedule','RCEP Tariffs','HS Nomenclature 2022','China GB/T','INSW Portal','MFN Rates','WTO ITA Agreement'];
+  const track = document.getElementById('mq');
+  const set = items.map(t => `<span class="mq-item"><span class="mq-dot"></span>${t}</span>`).join('');
+  track.innerHTML = set + set; // duplicate for seamless loop
+}
+
+/* ═══════════════════════════════════════
+   CURSOR GLOW
+═══════════════════════════════════════ */
+function initCursorGlow() {
+  document.querySelectorAll('.panel').forEach(panel => {
+    panel.addEventListener('mousemove', e => {
+      const r = panel.getBoundingClientRect();
+      panel.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      panel.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    });
+    panel.addEventListener('mouseleave', () => {
+      panel.style.setProperty('--mx', '-100%');
+      panel.style.setProperty('--my', '-100%');
+    });
+  });
+}
+
+/* ═══════════════════════════════════════
+   COUNTER ANIMATION
+═══════════════════════════════════════ */
+function initCounters() {
+  const els = document.querySelectorAll('[data-target]');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if(!entry.isIntersecting) return;
+      const el = entry.target;
+      const target = parseInt(el.dataset.target);
+      const dur = 900, start = performance.now();
+      function step(now) {
+        const t = Math.min((now - start) / dur, 1);
+        const ease = 1 - Math.pow(1 - t, 3);
+        el.textContent = Math.round(ease * target);
+        if(t < 1) requestAnimationFrame(step);
+        else el.textContent = target;
+      }
+      requestAnimationFrame(step);
+      obs.unobserve(el);
+    });
+  }, { threshold: 0.5 });
+  els.forEach(el => obs.observe(el));
+  // Text stat (GPT-4o)
+  document.querySelectorAll('[data-text]').forEach(el => {
+    const obs2 = new IntersectionObserver(entries => {
+      entries.forEach(e => { if(e.isIntersecting){ el.textContent = el.dataset.text; obs2.unobserve(el); } });
+    }, { threshold:0.5 });
+    obs2.observe(el);
+  });
+}
+
+/* ═══════════════════════════════════════
+   KEYBOARD SHORTCUTS
+═══════════════════════════════════════ */
+function initKbd() {
+  document.addEventListener('keydown', e => {
+    const inp = document.getElementById('queryInput');
+    if(e.key === '/' && document.activeElement !== inp) {
+      e.preventDefault();
+      inp.focus();
+    }
+    if(e.key === 'Escape' && document.activeElement === inp) {
+      inp.value = '';
+      inp.blur();
+    }
+    if((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      inp.focus();
+    }
+    if(e.key === 'Enter' && document.activeElement === inp) {
+      doSearch();
+    }
+  });
+}
+
+/* ═══════════════════════════════════════
+   PLACEHOLDER CYCLING
+═══════════════════════════════════════ */
+function initPlaceholder() {
+  let idx = 0;
+  setInterval(() => {
+    const inp = document.getElementById('queryInput');
+    if(document.activeElement === inp) return;
+    const phs = PLACEHOLDERS[MODE];
+    if(!phs) return;
+    idx = (idx + 1) % phs.length;
+    inp.style.transition = 'opacity .3s';
+    inp.style.opacity = '0';
+    setTimeout(() => {
+      inp.placeholder = phs[idx];
+      inp.style.opacity = '1';
+    }, 300);
+  }, 2800);
+}
+
+/* ═══════════════════════════════════════
+   INIT
+═══════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  lucide.createIcons();
+  initNav();
+  initSegment();
+  initMarquee();
+  initCursorGlow();
+  initCounters();
+  initKbd();
+  initPlaceholder();
+  updateInputLabel();
+  updateChips();
+  renderEmpty();
+});
+</script>
+</body>
+</html>
